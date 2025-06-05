@@ -1,11 +1,25 @@
 'use client'
-
-import { Auth } from '@supabase/auth-ui-react'
-import { darkThemes, ThemeMinimal, ThemeSupa } from '@supabase/auth-ui-shared'
-import { supabase } from '@/lib/supabaseClient'
-import { motion } from 'framer-motion'
+import { Auth } from '@supabase/auth-ui-react';
+import { darkThemes, ThemeMinimal, ThemeSupa } from '@supabase/auth-ui-shared';
+import { supabase } from '@/lib/supabaseClient';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function LoginPage() {
+    const router = useRouter();
+
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+                router.push('/home');
+            }
+        });
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [router]);
+
     return (
         <div className={`min-h-screen bg-black text-white flex flex-col items-center justify-center`}>
             <motion.div
@@ -21,7 +35,6 @@ export default function LoginPage() {
                             y: ['100vh', '-10vh'],
                             x: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
                             opacity: [0.6, 1, 0.6],
-
                         }}
                         transition={{
                             duration: 8 + Math.random() * 5,
@@ -58,5 +71,5 @@ export default function LoginPage() {
                 />
             </div>
         </div>
-    )
+    );
 }
